@@ -1,0 +1,14 @@
+services:
+  postgres-db:
+    image: asia-northeast1-docker.pkg.dev/mahking-dev/mahking-dev/postgres@sha256:5f15e54f2555331c30ef87987dbc5cf3a602be1b88d14c5ac62949ae03f23989
+    volumes:
+      - ./postgres-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      TZ: Asia/Tokyo
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      PGPASSWORD: "password"
+    command: postgres -c max_locks_per_transaction=1024 -c fsync=off
