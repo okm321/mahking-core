@@ -15,8 +15,17 @@ sql:
         emit_json_tags: true
         emit_interface: false
         sql_package: "pgx/v5"
-overrides:
-    go: null
+        overrides:
+          - db_type: "pg_catalog.int4"
+            go_type:
+              import: "github.com/guregu/null/v6"
+              type: "Int"
+            nullable: true
+          - db_type: "pg_catalog.text"
+            go_type:
+              import: "github.com/guregu/null/v6"
+              type: "String"
+            nullable: true
 plugins: []
 rules: []
 options: {}

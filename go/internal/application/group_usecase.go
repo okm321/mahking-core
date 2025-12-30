@@ -9,16 +9,19 @@ import (
 )
 
 type GroupUsecase struct {
-	groupRepo domain.GroupRepository
+	groupRepo  domain.GroupRepository
+	memberRepo domain.MemberRepository
 }
 
 type NewGroupUsecaseArgs struct {
-	GroupRepo domain.GroupRepository
+	GroupRepo  domain.GroupRepository
+	MemberRepo domain.MemberRepository
 }
 
 func NewGroupUsecase(args *NewGroupUsecaseArgs) *GroupUsecase {
 	return &GroupUsecase{
-		groupRepo: args.GroupRepo,
+		groupRepo:  args.GroupRepo,
+		memberRepo: args.MemberRepo,
 	}
 }
 
@@ -34,16 +37,54 @@ func (u *GroupUsecase) List(ctx context.Context) ([]appout.Group, error) {
 	return res, nil
 }
 
-func (u *GroupUsecase) Create(ctx context.Context, in appin.CreateGroupCommand) (appout.Group, error) {
+func (u *GroupUsecase) Create(ctx context.Context, in appin.CreateGroupWithRule) (*appout.Group, error) {
 	err := in.Validate()
 	if err != nil {
-		return appout.Group{}, err
+		return nil, err
 	}
 
-	g, err := u.groupRepo.Create(ctx, in.Name)
+	dms := make([]*domain.Member, 0, len(in.MemberNames))
+	for _, mn := range in.MemberNames {
+		dm, err := domain.NewMember(0, domain.NewMemberArgs{
+			Name: mn,
+		})
+		if err != nil {
+			return nil, err
+		}
+		dms = append(dms, dm)
+	}
+
+	dr, err := domain.NewRule(0, domain.NewRuleArgs{
+		MahjongType:           in.Rules.MahjongType,
+		InitialPoints:         in.Rules.InitialPoints,
+		ReturnPoints:          in.Rules.ReturnPoints,
+		RankingPointsFirst:    in.Rules.RankingPointsFirst,
+		RankingPointsSecond:   in.Rules.RankingPointsSecond,
+		RankingPointsThird:    in.Rules.RankingPointsThird,
+		RankingPointsFour:     in.Rules.RankingPointsFour,
+		FractionalCalculation: in.Rules.FractionalCalculation,
+		UseBust:               in.Rules.UseBust,
+		BustPoint:             in.Rules.BustPoint,
+		UseChip:               in.Rules.UseChip,
+		ChipPoint:             in.Rules.ChipPoint,
+	})
 	if err != nil {
-		return appout.Group{}, err
+		return nil, err
 	}
 
-	return appout.NewGroup(g), nil
+	dg, err := domain.NewGroup(domain.NewGroupArgs{
+		Name:    in.Name,
+		Members: dms,
+		Rule:    dr,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = u.groupRepo.Create(ctx, dg)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

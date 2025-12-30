@@ -2,10 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/okm321/mahking-go/internal/application"
 	appin "github.com/okm321/mahking-go/internal/application/in"
 	"github.com/okm321/mahking-go/pkg/logger"
@@ -42,20 +40,17 @@ func (h *groupHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *groupHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var cmd appin.CreateGroupCommand
-	if err := json.NewDecoder(r.Body).Decode(&cmd); err != nil {
+	var input appin.CreateGroupWithRule
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "invalid json body", http.StatusBadRequest)
 		return
 	}
-	group, err := h.usecase.Create(ctx, cmd)
+	group, err := h.usecase.Create(ctx, input)
 	if err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		logger.ErrorContext(ctx, "failed to create group", "error", err)
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+		// logger.ErrorContext(ctx, "failed to create group", "error", err)
+		// http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 

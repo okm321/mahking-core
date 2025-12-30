@@ -5,6 +5,7 @@
 package sqlc
 
 import (
+	null "github.com/guregu/null/v6"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -55,17 +56,17 @@ type Rule struct {
 	// 3位のウマ
 	RankingPointsThird int32 `json:"ranking_points_third"`
 	// 4位のウマ
-	RankingPointsFourth pgtype.Int4 `json:"ranking_points_fourth"`
+	RankingPointsFourth null.Int `json:"ranking_points_fourth"`
 	// 1: 切り上げ, 2: 切り捨て, 3: 四捨五入, 4: 10点未満切り上げ, 5: 10点未満切り捨て
 	FractionalCalculation int32 `json:"fractional_calculation"`
 	// 飛び設定
 	UseBust bool `json:"use_bust"`
 	// 飛び賞のポイント
-	BustPoint pgtype.Int4 `json:"bust_point"`
+	BustPoint null.Int `json:"bust_point"`
 	// チップ設定
 	UseChip bool `json:"use_chip"`
 	// チップのポイント
-	ChipPoint pgtype.Int4        `json:"chip_point"`
+	ChipPoint null.Int           `json:"chip_point"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }

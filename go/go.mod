@@ -9,8 +9,11 @@ require (
 	github.com/go-playground/validator/v10 v10.29.0
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/google/uuid v1.6.0
+	github.com/guregu/null/v6 v6.0.0
 	github.com/jackc/pgx/v5 v5.7.6
+	github.com/k0kubun/pp/v3 v3.5.0
 	github.com/pkg/errors v0.9.1
+	github.com/sivchari/govalid v1.8.0
 	go.opentelemetry.io/otel/trace v1.38.0
 )
 
@@ -33,7 +36,7 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
 )

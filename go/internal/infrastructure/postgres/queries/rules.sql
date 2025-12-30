@@ -1,0 +1,48 @@
+-- name: CreateRule :one
+INSERT INTO rules (
+  group_id,
+  mahjong_type,
+  initial_points,
+  return_points,
+  ranking_points_first,
+  ranking_points_second,
+  ranking_points_third,
+  ranking_points_fourth,
+  fractional_calculation,
+  use_bust,
+  bust_point,
+  use_chip,
+  chip_point
+)
+VALUES (
+  @group_id,
+  @mahjong_type,
+  @initial_points,
+  @return_points,
+  @ranking_points_first,
+  @ranking_points_second,
+  @ranking_points_third,
+  @ranking_points_fourth,
+  @fractional_calculation,
+  @use_bust,
+  @bust_point,
+  @use_chip,
+  @chip_point
+)
+RETURNING
+  id,
+  group_id,
+  mahjong_type,
+  initial_points,
+  return_points,
+  ranking_points_first,
+  ranking_points_second,
+  ranking_points_third,
+  ranking_points_fourth,
+  fractional_calculation,
+  use_bust,
+  bust_point,
+  use_chip,
+  chip_point,
+  created_at,
+  updated_at;

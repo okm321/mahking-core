@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/guregu/null/v6"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/okm321/mahking-go/internal/domain"
 	"github.com/okm321/mahking-go/internal/infrastructure/postgres/sqlc"
+	pkgerror "github.com/okm321/mahking-go/pkg/error"
 )
 
 type GroupRepository struct {
@@ -36,17 +38,60 @@ func (r *GroupRepository) List(ctx context.Context) ([]domain.Group, error) {
 	return groups, nil
 }
 
-func (r *GroupRepository) Create(ctx context.Context, name string) (domain.Group, error) {
-	row, err := r.q.CreateGroup(ctx, name)
+func (r *GroupRepository) Create(ctx context.Context, group *domain.Group) (*domain.Group, error) {
+	row, err := r.q.CreateGroup(ctx, group.Name)
 	if err != nil {
-		return domain.Group{}, fmt.Errorf("create group: %w", err)
+		return nil, err
 	}
 
-	return domain.Group{
+	group.ID = row.ID
+
+	err = r.createRelatedInfo(ctx, group)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Group{
 		ID:   row.ID,
 		UID:  row.Uid.String(),
 		Name: row.Name,
 	}, nil
+}
+
+func (r *GroupRepository) createRelatedInfo(ctx context.Context, group *domain.Group) (err error) {
+	memberParams := make([]sqlc.CreateMembersParams, 0, len(group.Members))
+	for _, m := range group.Members {
+		memberParams = append(memberParams, sqlc.CreateMembersParams{
+			GroupID: group.ID,
+			Name:    m.Name,
+		})
+	}
+	_, err = r.q.CreateMembers(ctx, memberParams)
+	if err != nil {
+		return pkgerror.Wrap(err, "create related members")
+	}
+
+	ruleParam := sqlc.CreateRuleParams{
+		GroupID:               group.ID,
+		MahjongType:           int32(group.Rule.MahjongType),
+		InitialPoints:         int32(group.Rule.InitialPoints),
+		ReturnPoints:          int32(group.Rule.ReturnPoints),
+		RankingPointsFirst:    int32(group.Rule.RankingPointsFirst),
+		RankingPointsSecond:   int32(group.Rule.RankingPointsSecond),
+		RankingPointsThird:    int32(group.Rule.RankingPointsThird),
+		RankingPointsFourth:   null.IntFromPtr(group.Rule.RankingPointsFour.Ptr()),
+		FractionalCalculation: int32(group.Rule.FractionalCalculation),
+		UseBust:               group.Rule.UseBust,
+		BustPoint:             null.IntFromPtr(group.Rule.BustPoint.Ptr()),
+		UseChip:               group.Rule.UseChip,
+		ChipPoint:             null.IntFromPtr(group.Rule.ChipPoint.Ptr()),
+	}
+	_, err = r.q.CreateRule(ctx, ruleParam)
+	if err != nil {
+		return pkgerror.Wrap(err, "create related rule")
+	}
+
+	return nil
 }
 
 var _ domain.GroupRepository = (*GroupRepository)(nil)
