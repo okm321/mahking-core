@@ -1,5 +1,12 @@
 package time
 
-import "time"
+import (
+	"context"
+	"time"
 
-var JST, _ = time.LoadLocation("Asia/Tokyo")
+	"github.com/newmo-oss/ctxtime"
+)
+
+func Now(ctx context.Context) time.Time {
+	return ctxtime.Now(ctx).In(time.Local)
+}

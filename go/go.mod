@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/guregu/null/v6 v6.0.0
 	github.com/jackc/pgx/v5 v5.7.6
+	github.com/newmo-oss/ctxtime v0.2.2
 	github.com/pkg/errors v0.9.1
 	github.com/sivchari/govalid v1.8.0
 	go.opentelemetry.io/otel/trace v1.38.0

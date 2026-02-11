@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"
@@ -181,15 +183,22 @@ func processErrorsInArgs(args []any) []any {
 // ========================================
 
 // HTTPAttr HTTPリクエスト情報をslog属性として返す
-func HTTPAttr(req *http.Request, statusCode int) slog.Attr {
+func HTTPAttr(req *http.Request, statusCode int, duration time.Duration, responseSize int) slog.Attr {
+	host, _, err := net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		host = req.RemoteAddr
+	}
+
 	return slog.Group("httpRequest",
 		slog.String("requestMethod", req.Method),
-		slog.String("requestUrl", req.URL.Path),
+		slog.String("requestUrl", req.RequestURI),
 		slog.Int("status", statusCode),
 		slog.String("userAgent", req.UserAgent()),
-		slog.String("remoteIp", req.RemoteAddr),
+		slog.String("remoteIp", host),
 		slog.String("referer", req.Referer()),
 		slog.String("protocol", req.Proto),
+		slog.String("latency", fmt.Sprintf("%.9fs", duration.Seconds())),
+		slog.Int("responseSize", responseSize),
 	)
 }
 

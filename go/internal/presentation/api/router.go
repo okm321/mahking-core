@@ -1,10 +1,11 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/okm321/mahking-go/pkg/logger"
 )
 
 // Router is an alias to make dependency injection explicit.
@@ -18,10 +19,11 @@ type HandlerSet struct {
 func NewRouter(handlers HandlerSet) Router {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
+	r.Use(httpLogger)
 	registerMiddlewares(r)
 
 	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
+		logger.WarnContext(context.Background(), "root endpoint accessed")
 		_, _ = w.Write([]byte("welcome"))
 	})
 
