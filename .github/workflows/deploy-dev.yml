@@ -37,3 +37,6 @@ jobs:
       environment: dev
       env: dev
     secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
