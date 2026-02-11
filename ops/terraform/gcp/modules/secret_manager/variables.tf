@@ -31,3 +31,9 @@ variable "password_length" {
   type        = number
   default     = 24
 }
+
+variable "accessor_service_accounts" {
+  description = "シークレットにアクセスできるサービスアカウントのリスト"
+  type        = list(string)
+  default     = []
+}

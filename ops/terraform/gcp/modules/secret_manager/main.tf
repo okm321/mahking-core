@@ -19,3 +19,15 @@ resource "google_secret_manager_secret_version" "main" {
 
   depends_on = [random_password.main] # 順序を明示
 }
+
+# ==============================================================================
+# IAM: シークレットへのアクセス権限を付与
+# ==============================================================================
+resource "google_secret_manager_secret_iam_member" "accessor" {
+  for_each = toset(var.accessor_service_accounts)
+
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.main.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${each.value}"
+}

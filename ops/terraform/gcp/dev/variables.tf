@@ -9,6 +9,7 @@ locals {
   ****************************************/
   env         = "dev"
   gcp_project = "mahking-dev"
+  region      = "asia-northeast1"
 
   /****************************************
     Artifact Registry
@@ -33,8 +34,21 @@ locals {
   services = [
     "sqladmin.googleapis.com",
     "compute.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "servicenetworking.googleapis.com",  # Private Service Connection用
+    "run.googleapis.com",                # Cloud Run用
+    "certificatemanager.googleapis.com", # Certificate Manager用
+    "iam.googleapis.com",                # Workload Identity Federation用
   ]
+
+  /****************************************
+    VPC
+  ****************************************/
+  vpc = {
+    network_name = "mahking-${local.env}-vpc"
+    subnet_name  = "mahking-${local.env}-subnet"
+    subnet_cidr  = "10.0.0.0/24"
+  }
 
   /****************************************
     Cloud SQL
@@ -50,4 +64,28 @@ locals {
   }
 
   authorized_networks = []
+
+  /****************************************
+    Cloud Run
+  ****************************************/
+  cloud_run = {
+    service_name          = "mahking-${local.env}-api"
+    image                 = "us-docker.pkg.dev/cloudrun/container/hello" # 初回はサンプルイメージ
+    port                  = 8080
+    cpu                   = "1"
+    memory                = "512Mi"
+    min_instances         = 0
+    max_instances         = 10
+    ingress               = "INGRESS_TRAFFIC_ALL"
+    allow_unauthenticated = true
+  }
+
+  /****************************************
+    Load Balancer
+  ****************************************/
+  load_balancer = {
+    name       = "mahking-${local.env}-lb"
+    domain     = "mahking-api.okmkm.dev" # カスタムドメイン（HTTPS有効）
+    enable_cdn = false
+  }
 }

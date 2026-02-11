@@ -1,27 +1,24 @@
 # ==============================================================================
-# プロジェクト情報の取得（サービスアカウント名に必要）
+# Artifact Registry
 # ==============================================================================
-data "google_project" "main" {
-  project_id = local.gcp_project
-}
-
-# Cloud Runが使うデフォルトのサービスアカウント
-locals {
-  cloud_run_service_account = "${data.google_project.main.number}-compute@developer.gserviceaccount.com"
-}
-
 module "artifact_registry_docker" {
   source        = "../modules/artifact_registry"
   repository_id = local.ar_mahking.repository_id
   env           = local.env
 }
 
+# ==============================================================================
+# Project Services (API有効化)
+# ==============================================================================
 module "project_services" {
   source     = "../modules/project_services"
   project_id = local.gcp_project
   services   = local.services
 }
 
+# ==============================================================================
+# Secret Manager
+# ==============================================================================
 module "secrets" {
   source   = "../modules/secret_manager"
   for_each = local.secrets
@@ -31,9 +28,6 @@ module "secrets" {
   auto_generate   = lookup(each.value, "auto_generate", true)
   secret_data     = lookup(each.value, "secret_data", "")
   password_length = lookup(each.value, "password_length", 24)
-
-  # Cloud Runからアクセスできるようにする
-  accessor_service_accounts = [local.cloud_run_service_account]
 
   depends_on = [module.project_services]
 }
@@ -59,21 +53,20 @@ module "vpc" {
 module "cloud_sql" {
   source = "../modules/cloud_sql"
 
-  project_id          = local.gcp_project
-  instance_name       = local.cloud_sql.instance_name
-  database_name       = local.cloud_sql.database_name
-  db_user             = local.cloud_sql.db_user
-  db_password         = module.secrets["db_password"].secret_data
-  tier                = local.cloud_sql.tier
-  disk_size           = local.cloud_sql.disk_size
-  postgres_version    = local.cloud_sql.postgres_version
-  authorized_networks = local.authorized_networks
-  use_backup          = local.cloud_sql.use_backup
-
-  # Private IP設定（VPCと接続）
+  project_id             = local.gcp_project
+  region                 = local.region
+  instance_name          = local.cloud_sql.instance_name
+  database_name          = local.cloud_sql.database_name
+  db_user                = local.cloud_sql.db_user
+  db_password            = module.secrets["db_password"].secret_data
+  tier                   = local.cloud_sql.tier
+  disk_size              = local.cloud_sql.disk_size
+  postgres_version       = local.cloud_sql.postgres_version
+  use_backup             = local.cloud_sql.use_backup
+  deletion_protection    = local.cloud_sql.deletion_protection
   network_id             = module.vpc.network_id
   private_vpc_connection = module.vpc.private_vpc_connection
-  enable_public_ip       = true
+  enable_public_ip       = false
 
   depends_on = [module.project_services, module.vpc]
 }
@@ -135,6 +128,7 @@ module "load_balancer" {
   cloud_run_service_name = module.cloud_run.service_name
   domain                 = local.load_balancer.domain
   enable_cdn             = local.load_balancer.enable_cdn
+  enable_logging         = local.load_balancer.enable_logging
 
   depends_on = [module.cloud_run]
 }

@@ -4,21 +4,28 @@ resource "google_sql_database_instance" "main" {
   database_version = var.postgres_version
   region           = var.region
 
+  # Private Service Connectionが完了してからインスタンスを作成
+  depends_on = [var.private_vpc_connection]
+
   settings {
     tier            = var.tier
-    edition         = "ENTERPRISE" # ← これを追加
+    edition         = "ENTERPRISE"
     disk_size       = var.disk_size
     disk_type       = "PD_SSD"
     disk_autoresize = true
 
+    # ================================================================
+    # IP設定: Private IP を有効化
+    # ================================================================
     ip_configuration {
-      ipv4_enabled = true
+      ipv4_enabled    = var.enable_public_ip # Public IPを無効化
+      private_network = var.network_id       # VPCを指定してPrivate IPを取得
 
       dynamic "authorized_networks" {
         for_each = var.authorized_networks
         content {
-          name  = aauthorized_networks.value.name
-          value = aauthorized_networks.value.value
+          name  = authorized_networks.value.name
+          value = authorized_networks.value.value
         }
       }
     }

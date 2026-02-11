@@ -18,8 +18,8 @@ var (
 )
 
 // Init ロガーの初期化
-func Init(projectID string) {
-	projectID = projectID
+func Init(pid string) {
+	projectID = pid
 	SetDebug(true)
 }
 
