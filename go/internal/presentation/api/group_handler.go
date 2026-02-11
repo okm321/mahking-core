@@ -51,7 +51,7 @@ func (h *groupHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 		// logger.ErrorContext(ctx, "failed to create group", "error", err)
 		// http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
+		// return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
