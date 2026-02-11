@@ -18,8 +18,8 @@ type DB struct {
 	DbName   string `env:"PG_DBNAME" envDefault:"postgres"`
 	Schema   string `env:"PG_SCHEMA" envDefault:"mahking_local"`
 	Params   string `env:"PG_PARAMS" envDefault:"sslmode=disable timezone=Asia/Tokyo lock_timeout=50000"`
-	MinConns int    `env:"MIN_CONNS" envDefault:"2"`
-	MaxConns int    `env:"MAX_CONNS" envDefault:"10"`
+	MinConns int32 `env:"MIN_CONNS" envDefault:"2"`
+	MaxConns int32 `env:"MAX_CONNS" envDefault:"10"`
 }
 
 // Connect 新しいプールを作成（シングルトン管理なし）
@@ -30,10 +30,10 @@ func Connect(cnf DB) (*pgxpool.Pool, error) {
 	}
 
 	if cnf.MinConns > 0 {
-		cfg.MinConns = int32(cnf.MinConns)
+		cfg.MinConns = cnf.MinConns
 	}
 	if cnf.MaxConns > 0 {
-		cfg.MaxConns = int32(cnf.MaxConns)
+		cfg.MaxConns = cnf.MaxConns
 	}
 
 	cfg.PrepareConn = prepareSession

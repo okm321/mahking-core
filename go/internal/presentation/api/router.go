@@ -22,7 +22,7 @@ func NewRouter(handlers HandlerSet) Router {
 	registerMiddlewares(r)
 
 	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("welcome"))
+		_, _ = w.Write([]byte("welcome"))
 	})
 
 	r.Route("/groups", func(r chi.Router) {
