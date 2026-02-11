@@ -8,6 +8,7 @@ import (
 	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // DB configuration
@@ -65,14 +66,16 @@ func DSN(c DB) string {
 const groupSettingName = "app.group_id"
 
 func prepareSession(ctx context.Context, conn *pgx.Conn) (bool, error) {
+	// set_configはコネクション初期化用なのでトレース対象外にする
+	noTraceCtx := trace.ContextWithSpan(ctx, trace.SpanFromContext(context.Background()))
 	session := sessionFromContext(ctx)
 	switch session.kind {
 	case sessionKindGroup:
-		if err := setGroupConfig(ctx, conn, session.groupID); err != nil {
+		if err := setGroupConfig(noTraceCtx, conn, session.groupID); err != nil {
 			return false, err
 		}
 	default:
-		if err := clearGroupConfig(ctx, conn); err != nil {
+		if err := clearGroupConfig(noTraceCtx, conn); err != nil {
 			return false, err
 		}
 	}
