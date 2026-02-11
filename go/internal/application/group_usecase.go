@@ -7,6 +7,7 @@ import (
 	appout "github.com/okm321/mahking-go/internal/application/out"
 	"github.com/okm321/mahking-go/internal/domain"
 	pkgerror "github.com/okm321/mahking-go/pkg/error"
+	pkgtrace "github.com/okm321/mahking-go/pkg/trace"
 )
 
 type GroupUsecase struct {
@@ -26,20 +27,26 @@ func NewGroupUsecase(args *NewGroupUsecaseArgs) *GroupUsecase {
 	}
 }
 
-func (u *GroupUsecase) List(ctx context.Context) ([]appout.Group, error) {
+func (u *GroupUsecase) List(ctx context.Context) (res []appout.Group, err error) {
+	ctx = pkgtrace.StartSpan(ctx, "GroupUsecase.List")
+	defer func() { pkgtrace.EndSpan(ctx, err) }()
+
 	groups, err := u.groupRepo.List(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res := make([]appout.Group, 0, len(groups))
+	res = make([]appout.Group, 0, len(groups))
 	for _, g := range groups {
 		res = append(res, appout.NewGroup(g))
 	}
 	return res, nil
 }
 
-func (u *GroupUsecase) Create(ctx context.Context, in appin.CreateGroupWithRule) (*appout.Group, error) {
-	err := in.Validate()
+func (u *GroupUsecase) Create(ctx context.Context, in appin.CreateGroupWithRule) (res *appout.Group, err error) {
+	ctx = pkgtrace.StartSpan(ctx, "GroupUsecase.Create")
+	defer func() { pkgtrace.EndSpan(ctx, err) }()
+
+	err = in.Validate()
 	if err != nil {
 		return nil, pkgerror.Errorf("invalid input: %w", err)
 	}

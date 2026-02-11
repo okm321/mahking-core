@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/okm321/mahking-go/pkg/logger"
+	"github.com/riandyrn/otelchi"
 )
 
 // httpLogger はCloud Loggingでは不要なため一旦未使用
@@ -35,6 +36,7 @@ func httpLogger(next http.Handler) http.Handler {
 
 func registerMiddlewares(c chi.Router) {
 	c.Use(middleware.Recoverer)
+	c.Use(otelchi.Middleware("mahking-go", otelchi.WithChiRoutes(c)))
 
 	c.Use(cors.Handler(cors.Options{
 		AllowCredentials: true,

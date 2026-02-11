@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -36,6 +37,7 @@ func Connect(cnf DB) (*pgxpool.Pool, error) {
 		cfg.MaxConns = cnf.MaxConns
 	}
 
+	cfg.ConnConfig.Tracer = otelpgx.NewTracer(otelpgx.WithTrimSQLInSpanName())
 	cfg.PrepareConn = prepareSession
 	cfg.AfterRelease = resetGroupSetting
 

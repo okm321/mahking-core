@@ -11,7 +11,16 @@ import (
 type Config struct {
 	Server     Server
 	GCP        GCP
+	Telemetry  Telemetry
 	DBPostgres pkgpostgres.DB
+}
+
+// Telemetry configurations.
+type Telemetry struct {
+	ServiceName    string  `env:"OTEL_SERVICE_NAME" envDefault:"mahking-go"`
+	ServiceVersion string  `env:"OTEL_SERVICE_VERSION" envDefault:"unknown"`
+	Environment    string  `env:"OTEL_ENVIRONMENT" envDefault:"dev"`
+	SampleRate     float64 `env:"OTEL_SAMPLE_RATE" envDefault:"1.0"`
 }
 
 // Server configurations.
