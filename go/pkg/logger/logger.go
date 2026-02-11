@@ -35,10 +35,24 @@ func SetDebug(debug bool) {
 			Level: slog.LevelDebug,
 		})
 	} else {
-		// 本番環境: Cloud Logging形式（後で実装）
-		// とりあえずJSON
+		// 本番環境: Cloud Logging形式
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelInfo,
+			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+				if len(groups) > 0 {
+					return a
+				}
+				switch a.Key {
+				case slog.MessageKey:
+					a.Key = "message"
+				case slog.LevelKey:
+					a.Key = "severity"
+					if level, ok := a.Value.Any().(slog.Level); ok && level == slog.LevelWarn {
+						a.Value = slog.StringValue("WARNING")
+					}
+				}
+				return a
+			},
 		})
 	}
 

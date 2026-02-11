@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -9,13 +8,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/okm321/mahking-go/pkg/logger"
-	pkgtime "github.com/okm321/mahking-go/pkg/time"
 )
 
 func httpLogger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
-		start := pkgtime.Now(context.Background())
+		start := time.Now()
 
 		defer func() {
 			status := ww.Status()
