@@ -12,6 +12,12 @@ type Error struct {
 	Reason      string `json:"reason,omitzero"`
 }
 
+// ErrorResponse はHTTPエラーレスポンス用の構造体
+type ErrorResponse struct {
+	Message string `json:"message"`
+	Reason  string `json:"reason,omitzero"`
+}
+
 func (e *Error) Error() string {
 	return e.Description
 }

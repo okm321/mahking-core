@@ -10,6 +10,9 @@ import (
 	"github.com/okm321/mahking-go/pkg/logger"
 )
 
+// httpLogger はCloud Loggingでは不要なため一旦未使用
+//
+//nolint:unused
 func httpLogger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)

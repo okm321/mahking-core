@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	pkgerror "github.com/okm321/mahking-go/pkg/error"
 	"github.com/okm321/mahking-go/pkg/logger"
@@ -34,8 +35,11 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 
 	var validationErrs govaliderrors.ValidationErrors
 	if errors.As(err, &validationErrs) {
-		logger.ErrorContext(ctx, "validation error", "error", err)
-		writeJSON(w, http.StatusBadRequest, validationErrs)
+		logger.WarnContext(ctx, "validation error", "error", err)
+		writeJSON(w, http.StatusBadRequest, pkgerror.ErrorResponse{
+			Message: validationMessage(validationErrs),
+			Reason:  string(pkgerror.ErrCodeValidation),
+		})
 		return
 	}
 
@@ -47,13 +51,22 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 	}
 
 	logger.ErrorContext(ctx, "internal server error", "error", err)
-	writeJSON(w, http.StatusInternalServerError, map[string]string{
-		"message": "internal server error",
+	writeJSON(w, http.StatusInternalServerError, pkgerror.ErrorResponse{
+		Message: "internal server error",
+		Reason:  string(pkgerror.ErrCodeInternal),
 	})
+}
+
+func validationMessage(errs govaliderrors.ValidationErrors) string {
+	msgs := make([]string, 0, len(errs))
+	for _, e := range errs {
+		msgs = append(msgs, e.Reason)
+	}
+	return strings.Join(msgs, ", ")
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(v)
+	_ = json.NewEncoder(w).Encode(v)
 }
