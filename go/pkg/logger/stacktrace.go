@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"runtime"
+	"strings"
 
 	pkgerrors "github.com/pkg/errors"
 )
@@ -56,8 +57,9 @@ func ErrorWithStackTrace(err error) slog.Attr {
 	if st != nil {
 		frames := st.StackTrace()
 		if len(frames) > 0 {
-			// エラー発生箇所の情報を追加
-			attrs = append(attrs, extractErrorLocation(frames[0])...)
+			// pkg/errorパッケージのフレームをスキップして実際の発火元を取得
+			callerFrame := findCallerFrame(frames)
+			attrs = append(attrs, extractErrorLocation(callerFrame)...)
 
 			// 全スタックトレースを追加
 			attrs = append(attrs,
@@ -108,6 +110,22 @@ func getStackTrace(err error) stackTracer {
 // 4. スタックトレース情報の抽出
 // ========================================
 
+// findCallerFrame pkg/errorパッケージのフレームをスキップして実際のエラー発火元を返す
+func findCallerFrame(frames pkgerrors.StackTrace) pkgerrors.Frame {
+	const errorPkg = "github.com/okm321/mahking-go/pkg/error"
+	for _, f := range frames {
+		pc := uintptr(f) - 1
+		fn := runtime.FuncForPC(pc)
+		if fn == nil {
+			continue
+		}
+		if !strings.HasPrefix(fn.Name(), errorPkg) {
+			return f
+		}
+	}
+	return frames[0]
+}
+
 // extractErrorLocation フレームからエラー発生箇所の情報を抽出
 //
 // pkg/errorsのFrameからファイル名、行番号、関数名を取得する
@@ -151,4 +169,3 @@ func extractErrorLocation(frame pkgerrors.Frame) []any {
 func formatStackTrace(frames pkgerrors.StackTrace) string {
 	return fmt.Sprintf("%+v", frames)
 }
-

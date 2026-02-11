@@ -35,7 +35,7 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 
 	var validationErrs govaliderrors.ValidationErrors
 	if errors.As(err, &validationErrs) {
-		logger.WarnContext(ctx, "validation error", "error", err)
+		logger.WarnContext(ctx, err.Error(), "error", err)
 		writeJSON(w, http.StatusBadRequest, pkgerror.ErrorResponse{
 			Message: validationMessage(validationErrs),
 			Reason:  string(pkgerror.ErrCodeValidation),
@@ -45,12 +45,12 @@ func handleError(w http.ResponseWriter, r *http.Request, err error) {
 
 	var pkgErr *pkgerror.Error
 	if errors.As(err, &pkgErr) {
-		logger.WarnContext(ctx, "bad request", "error", err)
+		logger.WarnContext(ctx, err.Error(), "error", err)
 		writeJSON(w, http.StatusBadRequest, pkgErr)
 		return
 	}
 
-	logger.ErrorContext(ctx, "internal server error", "error", err)
+	logger.ErrorContext(ctx, err.Error(), "error", err)
 	writeJSON(w, http.StatusInternalServerError, pkgerror.ErrorResponse{
 		Message: "internal server error",
 		Reason:  string(pkgerror.ErrCodeInternal),
