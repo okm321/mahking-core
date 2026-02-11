@@ -20,9 +20,9 @@ var (
 )
 
 // Init ロガーの初期化
-func Init(pid string) {
+func Init(pid string, debug bool) {
 	projectID = pid
-	SetDebug(true)
+	SetDebug(debug)
 }
 
 // SetDebug デバッグモードを設定

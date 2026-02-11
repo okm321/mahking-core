@@ -12,7 +12,7 @@ import (
 func main() {
 	ctx := context.Background()
 	cnf := config.Get()
-	logger.Init(cnf.GCP.ProjectID)
+	logger.Init(cnf.GCP.ProjectID, cnf.Server.Debug)
 
 	logger.InfoContext(ctx, "mahking-go started!")
 
