@@ -38,7 +38,7 @@ func Connect(cnf DB) (*pgxpool.Pool, error) {
 		cfg.MaxConns = cnf.MaxConns
 	}
 
-	cfg.ConnConfig.Tracer = otelpgx.NewTracer(otelpgx.WithTrimSQLInSpanName())
+	cfg.ConnConfig.Tracer = otelpgx.NewTracer()
 	cfg.PrepareConn = prepareSession
 	cfg.AfterRelease = resetGroupSetting
 
