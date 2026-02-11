@@ -19,7 +19,6 @@ type HandlerSet struct {
 func NewRouter(handlers HandlerSet) Router {
 	r := chi.NewRouter()
 
-	r.Use(httpLogger)
 	registerMiddlewares(r)
 
 	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
@@ -28,8 +27,8 @@ func NewRouter(handlers HandlerSet) Router {
 	})
 
 	r.Route("/groups", func(r chi.Router) {
-		r.Get("/", handlers.Group.List)
-		r.Post("/", handlers.Group.Create)
+		r.Get("/", Handle(handlers.Group.List))
+		r.Post("/", Handle(handlers.Group.Create))
 	})
 
 	return r

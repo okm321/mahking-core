@@ -6,6 +6,7 @@ import (
 	appin "github.com/okm321/mahking-go/internal/application/in"
 	appout "github.com/okm321/mahking-go/internal/application/out"
 	"github.com/okm321/mahking-go/internal/domain"
+	pkgerror "github.com/okm321/mahking-go/pkg/error"
 )
 
 type GroupUsecase struct {
@@ -40,7 +41,7 @@ func (u *GroupUsecase) List(ctx context.Context) ([]appout.Group, error) {
 func (u *GroupUsecase) Create(ctx context.Context, in appin.CreateGroupWithRule) (*appout.Group, error) {
 	err := in.Validate()
 	if err != nil {
-		return nil, err
+		return nil, pkgerror.Errorf("invalid input: %w", err)
 	}
 
 	dms := make([]*domain.Member, 0, len(in.MemberNames))
@@ -49,7 +50,7 @@ func (u *GroupUsecase) Create(ctx context.Context, in appin.CreateGroupWithRule)
 			Name: mn,
 		})
 		if err != nil {
-			return nil, err
+			return nil, pkgerror.Errorf("err creating member %s: %w", mn, err)
 		}
 		dms = append(dms, dm)
 	}
