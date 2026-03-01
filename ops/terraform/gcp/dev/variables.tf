@@ -35,10 +35,9 @@ locals {
     "sqladmin.googleapis.com",
     "compute.googleapis.com",
     "secretmanager.googleapis.com",
-    "servicenetworking.googleapis.com",  # Private Service Connection用
-    "run.googleapis.com",                # Cloud Run用
-    "certificatemanager.googleapis.com", # Certificate Manager用
-    "iam.googleapis.com",                # Workload Identity Federation用
+    "servicenetworking.googleapis.com", # Private Service Connection用
+    "run.googleapis.com",               # Cloud Run用
+    "iam.googleapis.com",               # Workload Identity Federation用
   ]
 
   /****************************************
@@ -78,14 +77,6 @@ locals {
     max_instances         = 10
     ingress               = "INGRESS_TRAFFIC_ALL"
     allow_unauthenticated = true
-  }
-
-  /****************************************
-    Load Balancer
-  ****************************************/
-  load_balancer = {
-    name       = "mahking-${local.env}-lb"
-    domain     = "mahking-api.okmkm.dev" # カスタムドメイン（HTTPS有効）
-    enable_cdn = false
+    domain                = "mahking-api.okmkm.dev"
   }
 }

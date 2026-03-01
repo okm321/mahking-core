@@ -37,14 +37,11 @@ var (
 	// ErrrulesRankingPointsSecondRequiredValidation is returned when the RankingPointsSecond is required but not provided.
 	ErrrulesRankingPointsSecondRequiredValidation = govaliderrors.ValidationError{Reason: "field RankingPointsSecond is required", Path: "rules.RankingPointsSecond", Type: "required"}
 
-	// ErrrulesRankingPointsThirdCELValidation is the error returned when the CEL expression evaluation fails.
-	ErrrulesRankingPointsThirdCELValidation = govaliderrors.ValidationError{Reason: "field RankingPointsThird failed CEL validation: this.MahjongType == 1 && this.RankingPointsFirst + this.RankingPointsSecond + value == 0", Path: "rules.RankingPointsThird", Type: "cel"}
-
 	// ErrrulesRankingPointsThirdRequiredValidation is returned when the RankingPointsThird is required but not provided.
 	ErrrulesRankingPointsThirdRequiredValidation = govaliderrors.ValidationError{Reason: "field RankingPointsThird is required", Path: "rules.RankingPointsThird", Type: "required"}
 
 	// ErrrulesRankingPointsFourCELValidation is the error returned when the CEL expression evaluation fails.
-	ErrrulesRankingPointsFourCELValidation = govaliderrors.ValidationError{Reason: "field RankingPointsFour failed CEL validation: this.MahjongType == 2 || this.RankingPointsFirst + this.RankingPointsSecond + this.RankingPointsThird + value == 0", Path: "rules.RankingPointsFour", Type: "cel"}
+	ErrrulesRankingPointsFourCELValidation = govaliderrors.ValidationError{Reason: "field RankingPointsFour failed CEL validation: this.MahjongType != 2 || value.Valid", Path: "rules.RankingPointsFour", Type: "cel"}
 
 	// ErrrulesFractionalCalculationRequiredValidation is returned when the FractionalCalculation is required but not provided.
 	ErrrulesFractionalCalculationRequiredValidation = govaliderrors.ValidationError{Reason: "field FractionalCalculation is required", Path: "rules.FractionalCalculation", Type: "required"}
@@ -111,15 +108,15 @@ func Validaterules(t *rules) error {
 		errs = append(errs, err)
 	}
 
-	if !((t.MahjongType == 1) && (t.RankingPointsFirst+t.RankingPointsSecond+t.RankingPointsThird == 0)) {
-		err := ErrrulesRankingPointsThirdCELValidation
+	if t.RankingPointsThird == 0 {
+		err := ErrrulesRankingPointsThirdRequiredValidation
 		err.Value = t.RankingPointsThird
 		errs = append(errs, err)
 	}
 
-	if t.RankingPointsThird == 0 {
-		err := ErrrulesRankingPointsThirdRequiredValidation
-		err.Value = t.RankingPointsThird
+	if !((t.MahjongType != 2) || (t.RankingPointsFour.Valid)) {
+		err := ErrrulesRankingPointsFourCELValidation
+		err.Value = t.RankingPointsFour
 		errs = append(errs, err)
 	}
 

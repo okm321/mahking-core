@@ -73,15 +73,6 @@ locals {
     max_instances         = 100   # 本番はより多くスケール可能
     ingress               = "INGRESS_TRAFFIC_ALL"
     allow_unauthenticated = true
-  }
-
-  # ============================================================================
-  # Load Balancer
-  # ============================================================================
-  load_balancer = {
-    name           = "mahking-${local.env}-lb"
-    domain         = null # 独自ドメインを設定する場合はここに指定（例: "api.example.com"）
-    enable_cdn     = true # 本番はCDN有効
-    enable_logging = true
+    domain                = null # 独自ドメインを設定する場合はここに指定（例: "api.example.com"）
   }
 }

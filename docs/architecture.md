@@ -11,21 +11,9 @@ graph TB
     end
 
     subgraph GCP["GCP (mahking-{env})"]
-        subgraph LB["Load Balancer"]
-            GlobalIP[Global IP]
-            HTTPS_FWD["Forwarding Rule<br/>:443"]
-            HTTP_FWD["Forwarding Rule<br/>:80"]
-            HTTPS_Proxy["HTTPS Proxy<br/>+ Certificate Manager"]
-            HTTP_Proxy["HTTP Proxy"]
-            URLMap["URL Map"]
-            Redirect["URL Map<br/>301 → HTTPS"]
-            Backend["Backend Service"]
-            NEG["Serverless NEG"]
-        end
-
         subgraph VPC["VPC (mahking-{env}-vpc)"]
             subgraph Subnet["Subnet (10.0.0.0/24)"]
-                CloudRun["Cloud Run<br/>mahking-{env}-api<br/>Go App :8080"]
+                CloudRun["Cloud Run<br/>mahking-{env}-api<br/>Go App :8080<br/>+ Domain Mapping"]
             end
 
             subgraph Google["Google Managed VPC"]
@@ -40,16 +28,7 @@ graph TB
     end
 
     User -->|HTTPS| DNS
-    DNS -->|A Record| GlobalIP
-    GlobalIP --> HTTPS_FWD
-    GlobalIP --> HTTP_FWD
-    HTTPS_FWD --> HTTPS_Proxy
-    HTTP_FWD --> HTTP_Proxy
-    HTTPS_Proxy --> URLMap
-    HTTP_Proxy --> Redirect
-    URLMap --> Backend
-    Backend --> NEG
-    NEG --> CloudRun
+    DNS -->|CNAME| CloudRun
     CloudRun -->|Direct VPC Egress<br/>PRIVATE_RANGES_ONLY| CloudSQL
     CloudRun -.->|PG_PASS| SM
     Subnet ---|VPC Peering| PSC
@@ -103,13 +82,11 @@ graph LR
         end
     end
 
-    User -->|HTTPS :443| LB["Load Balancer<br/>Global IP"]
-    LB --> CR
+    User -->|HTTPS| CR
     CR -->|Private IP| SQL
 
     style SQL fill:#4285f4,color:#fff
     style CR fill:#0f9d58,color:#fff
-    style LB fill:#f4b400,color:#fff
 ```
 
 ## CI/CD パイプライン
@@ -169,11 +146,9 @@ graph TD
     VPC --> SQL["cloud_sql<br/>PostgreSQL 18<br/>Private IP"]
     SM --> SQL
 
-    VPC --> CR["cloud_run<br/>Go App<br/>Direct VPC Egress"]
+    VPC --> CR["cloud_run<br/>Go App<br/>Direct VPC Egress<br/>+ Domain Mapping"]
     SQL --> CR
     SM -.->|PG_PASS| CR
-
-    CR --> LB["load_balancer<br/>HTTPS LB<br/>+ Certificate Manager"]
 ```
 
 ## IAM 構成
@@ -241,10 +216,9 @@ mahking-core/
     ├── prd/                      # prd 環境
     └── modules/
         ├── artifact_registry/    # Docker Registry
-        ├── cloud_run/            # Cloud Run
+        ├── cloud_run/            # Cloud Run + Domain Mapping
         ├── cloud_sql/            # Cloud SQL (PostgreSQL)
         ├── github_actions_wif/   # Workload Identity Federation
-        ├── load_balancer/        # HTTPS Load Balancer
         ├── project_services/     # GCP API 有効化
         ├── secret_manager/       # Secret Manager
         └── vpc/                  # VPC + Subnet + PSC
@@ -261,7 +235,6 @@ mahking-core/
 | **Cloud SQL 削除保護** | OFF | ON |
 | **Cloud Run CPU/Mem** | 1 / 512Mi | 2 / 1Gi |
 | **Cloud Run Instances** | 0-10 | 1-100 |
-| **CDN** | OFF | ON |
 | **Deploy 承認** | 自動 | 手動 (environment: production) |
 | **Subnet CIDR** | 10.0.0.0/24 | 10.1.0.0/24 |
 | **Domain** | mahking-api.okmkm.dev | TBD |

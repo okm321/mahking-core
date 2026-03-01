@@ -41,7 +41,10 @@ func Init(ctx context.Context, cfg Config) (shutdown func(context.Context) error
 
 	opts := []sdktrace.TracerProviderOption{
 		sdktrace.WithResource(res),
-		sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.TraceIDRatioBased(cfg.SampleRate))),
+		sdktrace.WithSampler(sdktrace.ParentBased(
+			sdktrace.TraceIDRatioBased(cfg.SampleRate),
+			sdktrace.WithRemoteParentNotSampled(sdktrace.TraceIDRatioBased(cfg.SampleRate)),
+		)),
 	}
 
 	if !cfg.Debug {

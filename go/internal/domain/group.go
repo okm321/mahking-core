@@ -7,17 +7,17 @@ import (
 )
 
 type Group struct {
-	ID      int64     // id
-	UID     string    // uuid
-	Name    string    // グループ名
+	ID  int64  // id
+	UID string // uuid
+	//govalid:required
+	//govalid:maxlength=100
+	Name string // グループ名
+	//govalid:required
+	//govalid:maxitems=10
 	Members []*Member // グループメンバー
-	Rule    *Rule     // グループに紐づくルール
+	//govalid:required
+	Rule *Rule // グループに紐づくルール
 }
-
-const (
-	MaxGroupNameLength   = 100
-	MaxGroupMembersCount = 10
-)
 
 type NewGroupArgs struct {
 	Name    string
@@ -37,6 +37,10 @@ func NewGroup(args NewGroupArgs) (_ *Group, err error) {
 		return nil, err
 	}
 
+	if err = grp.validateRules(); err != nil {
+		return nil, err
+	}
+
 	return &Group{
 		Name:    grp.Name,
 		Members: grp.Members,
@@ -44,15 +48,7 @@ func NewGroup(args NewGroupArgs) (_ *Group, err error) {
 	}, nil
 }
 
-func (g *Group) Validate() error {
-	if g.Name == "" {
-		return pkgerror.NewError("グループ名は必須です")
-	}
-
-	if len(g.Name) > MaxGroupNameLength {
-		return pkgerror.NewErrorf("グループ名は%d文字以内で入力してください", MaxGroupNameLength)
-	}
-
+func (g *Group) validateRules() error {
 	if g.Rule.MahjongType.RequiredMemberCount() > len(g.Members) {
 		return pkgerror.NewErrorf(
 			"%sは最低%d人のメンバーが必要です。 人数: %d人",
@@ -60,10 +56,6 @@ func (g *Group) Validate() error {
 			g.Rule.MahjongType.RequiredMemberCount(),
 			len(g.Members),
 		)
-	}
-
-	if len(g.Members) > MaxGroupMembersCount {
-		return pkgerror.NewErrorf("グループメンバーは最大%d人までです", MaxGroupMembersCount)
 	}
 
 	return nil

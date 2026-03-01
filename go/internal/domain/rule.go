@@ -6,20 +6,28 @@ import (
 )
 
 type Rule struct {
-	ID                    int64
-	GroupID               int64
-	MahjongType           MahjongType           // 三麻 or 四麻
-	InitialPoints         int                   // 持ち点（単位: 1,000）
-	ReturnPoints          int                   // 返し点（単位: 1,000）
-	RankingPointsFirst    int                   // 一位のウマ
-	RankingPointsSecond   int                   // 二位のウマ
-	RankingPointsThird    int                   // 三位のウマ
-	RankingPointsFour     null.Int              // 四位のウマ
+	ID      int64
+	GroupID int64
+	//govalid:required
+	//govalid:enum=MahjongTypeThree,MahjongTypeFour
+	MahjongType MahjongType // 三麻 or 四麻
+	//govalid:required
+	//govalid:gte=1
+	InitialPoints int // 持ち点（単位: 1,000）
+	//govalid:required
+	//govalid:gte=1
+	ReturnPoints int // 返し点（単位: 1,000）
+	RankingPointsFirst  int      // 一位のウマ
+	RankingPointsSecond int      // 二位のウマ
+	RankingPointsThird  int      // 三位のウマ
+	RankingPointsFour   null.Int // 四位のウマ
+	//govalid:required
+	//govalid:enum=FractionalCalculationRoundUp,FractionalCalculationRoundDown,FractionalCalculationRoundNearest,FractionalCalculationRoundUpBelowTen,FractionalCalculationRoundDownBelowTen
 	FractionalCalculation FractionalCalculation // 端数計算方法
-	UseBust               bool                  // 飛び設定
-	BustPoint             null.Int              // 飛び賞のポイント
-	UseChip               bool                  // チップ設定
-	ChipPoint             null.Int              // チップのポイント
+	UseBust   bool     // 飛び設定
+	BustPoint null.Int // 飛び賞のポイント
+	UseChip   bool     // チップ設定
+	ChipPoint null.Int // チップのポイント
 }
 
 type NewRuleArgs struct {
@@ -36,11 +44,6 @@ type NewRuleArgs struct {
 	UseChip               bool
 	ChipPoint             null.Int
 }
-
-const (
-	MinInitialPoints = 1
-	MinReturnPoints  = 1
-)
 
 func NewRule(groupID int64, args NewRuleArgs) (_ *Rule, err error) {
 	r := &Rule{
@@ -63,22 +66,14 @@ func NewRule(groupID int64, args NewRuleArgs) (_ *Rule, err error) {
 		return nil, err
 	}
 
+	if err := r.validateRules(); err != nil {
+		return nil, err
+	}
+
 	return r, nil
 }
 
-func (r *Rule) Validate() error {
-	if r.InitialPoints < MinInitialPoints {
-		return pkgerror.NewErrorf("持ち点は%d以上である必要があります: %d", MinInitialPoints, r.InitialPoints)
-	}
-
-	if r.ReturnPoints < MinReturnPoints {
-		return pkgerror.NewErrorf("返し点は%d以上である必要があります: %d", MinReturnPoints, r.ReturnPoints)
-	}
-
-	if !r.MahjongType.IsValid() {
-		return pkgerror.NewErrorf("無効な麻雀タイプです: %d", r.MahjongType)
-	}
-
+func (r *Rule) validateRules() error {
 	switch r.MahjongType {
 	case MahjongTypeThree:
 		if r.RankingPointsFirst+r.RankingPointsSecond+r.RankingPointsThird != 0 {
@@ -105,12 +100,6 @@ func (r *Rule) Validate() error {
 				r.RankingPointsFirst+r.RankingPointsSecond+r.RankingPointsThird+int(r.RankingPointsFour.Int64),
 			)
 		}
-	default:
-		return pkgerror.NewErrorf("無効な麻雀タイプです: %d", r.MahjongType)
-	}
-
-	if !r.FractionalCalculation.IsValid() {
-		return pkgerror.NewErrorf("無効な端数計算方法です: %d", r.FractionalCalculation)
 	}
 
 	if r.UseBust && !r.BustPoint.Valid {

@@ -96,6 +96,9 @@ module "cloud_run" {
   ingress               = local.cloud_run.ingress
   allow_unauthenticated = local.cloud_run.allow_unauthenticated
 
+  # カスタムドメイン
+  domain = local.cloud_run.domain
+
   # 環境変数（DBへの接続情報）
   env_vars = {
     PG_HOST   = module.cloud_sql.private_ip_address
@@ -114,23 +117,6 @@ module "cloud_run" {
   }
 
   depends_on = [module.project_services, module.vpc, module.cloud_sql]
-}
-
-# ==============================================================================
-# Load Balancer
-# ==============================================================================
-module "load_balancer" {
-  source = "../modules/load_balancer"
-
-  project_id             = local.gcp_project
-  region                 = local.region
-  name                   = local.load_balancer.name
-  cloud_run_service_name = module.cloud_run.service_name
-  domain                 = local.load_balancer.domain
-  enable_cdn             = local.load_balancer.enable_cdn
-  enable_logging         = local.load_balancer.enable_logging
-
-  depends_on = [module.cloud_run]
 }
 
 # ==============================================================================

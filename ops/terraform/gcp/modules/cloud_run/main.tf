@@ -109,3 +109,21 @@ resource "google_cloud_run_v2_service_iam_member" "public_access" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+# ==============================================================================
+# カスタムドメインマッピング
+# ==============================================================================
+resource "google_cloud_run_domain_mapping" "main" {
+  count    = var.domain != null ? 1 : 0
+  project  = var.project_id
+  location = var.region
+  name     = var.domain
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.main.name
+  }
+}

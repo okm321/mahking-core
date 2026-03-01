@@ -16,12 +16,6 @@ var (
 	// ErrCreateGroupWithRuleNameMaxLengthValidation is the error returned when the length of the field exceeds the maximum of 100.
 	ErrCreateGroupWithRuleNameMaxLengthValidation = govaliderrors.ValidationError{Reason: "field Name must have a maximum length of 100", Path: "CreateGroupWithRule.Name", Type: "maxlength"}
 
-	// ErrCreateGroupWithRuleMemberNamesMaxItemsValidation is the error returned when the length of the field exceeds the maximum of 10.
-	ErrCreateGroupWithRuleMemberNamesMaxItemsValidation = govaliderrors.ValidationError{Reason: "field MemberNames must have a maximum of 10 items", Path: "CreateGroupWithRule.MemberNames", Type: "maxitems"}
-
-	// ErrCreateGroupWithRuleMemberNamesMinItemsValidation is the error returned when the length of the field is less than the minimum of 3.
-	ErrCreateGroupWithRuleMemberNamesMinItemsValidation = govaliderrors.ValidationError{Reason: "field MemberNames must have a minimum of 3 items", Path: "CreateGroupWithRule.MemberNames", Type: "minitems"}
-
 	// ErrCreateGroupWithRuleMemberNamesRequiredValidation is returned when the MemberNames is required but not provided.
 	ErrCreateGroupWithRuleMemberNamesRequiredValidation = govaliderrors.ValidationError{Reason: "field MemberNames is required", Path: "CreateGroupWithRule.MemberNames", Type: "required"}
 )
@@ -36,18 +30,6 @@ func ValidateCreateGroupWithRule(t *CreateGroupWithRule) error {
 	if utf8.RuneCountInString(t.Name) > 100 {
 		err := ErrCreateGroupWithRuleNameMaxLengthValidation
 		err.Value = t.Name
-		errs = append(errs, err)
-	}
-
-	if len(t.MemberNames) > 10 {
-		err := ErrCreateGroupWithRuleMemberNamesMaxItemsValidation
-		err.Value = t.MemberNames
-		errs = append(errs, err)
-	}
-
-	if len(t.MemberNames) < 3 {
-		err := ErrCreateGroupWithRuleMemberNamesMinItemsValidation
-		err.Value = t.MemberNames
 		errs = append(errs, err)
 	}
 

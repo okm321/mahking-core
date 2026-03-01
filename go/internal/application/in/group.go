@@ -30,10 +30,9 @@ type rules struct {
 	RankingPointsSecond int `json:"ranking_points_second"` // 二位のウマ
 	//govalid:required
 	RankingPointsThird int `json:"ranking_points_third"` // 三位のウマ
-	//govalid:cel=this.MahjongType != 2 || has(value)
+	//govalid:cel=this.MahjongType != 2 || value.Valid
 	RankingPointsFour null.Int `json:"ranking_points_four"` // 四位のウマ
 	//govalid:required
-	//govalid:enum=domain.FractionalCalculationRoundUp,domain.FractionalCalculationRoundDown,domain.FractionalCalculationRoundNearest,domain.FractionalCalculationRoundUpBelow10,domain.FractionalCalculationRoundDownBelow10
 	FractionalCalculation domain.FractionalCalculation `json:"fractional_calculation"` // 1: 切り上げ, 2: 切り捨て, 3: 四捨五入, 4: 10点未満切り上げ, 5: 10点未満切り捨て
 	//govalid:required
 	UseBust   bool     `json:"use_bust"`   // 飛び設定

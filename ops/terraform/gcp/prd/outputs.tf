@@ -17,16 +17,6 @@ output "cloud_run_url" {
   value       = module.cloud_run.service_uri
 }
 
-output "load_balancer_ip" {
-  description = "Load BalancerのグローバルIP"
-  value       = module.load_balancer.ip_address
-}
-
-output "load_balancer_http_url" {
-  description = "Load BalancerのHTTP URL"
-  value       = module.load_balancer.http_url
-}
-
 output "vpc_network_name" {
   description = "VPCネットワーク名"
   value       = module.vpc.network_name

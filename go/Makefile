@@ -7,7 +7,19 @@ IMAGE       := $(REGISTRY)/api
 GIT_SHA     := $(shell git rev-parse --short HEAD)
 TAG         := $(IMAGE):$(GIT_SHA)
 
-.PHONY: docker-login build deploy release
+.PHONY: govalid sqlc vet lint docker-login build deploy release
+
+govalid: ## govalid のバリデーター生成
+	go tool govalid ./...
+
+sqlc: ## sqlc のクエリコード生成
+	sqlc generate
+
+vet: ## 静的解析
+	go vet ./...
+
+lint: ## golangci-lint 実行
+	go tool golangci-lint run ./...
 
 docker-login: ## Artifact Registry へログイン
 	gcloud auth configure-docker $(REGION)-docker.pkg.dev --quiet
