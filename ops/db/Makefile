@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: help schema-export proxy db-password db-connect migrate-status migrate-apply migrate-diff
+.PHONY: help schema-export proxy db-password db-connect migrate-status migrate-apply migrate-diff local-migrate-diff local-migrate-apply local-migrate-status local-migrate-hash
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -56,3 +56,17 @@ migrate-apply:  ## マイグレーションを適用
 migrate-diff:   ## スキーマ差分からマイグレーションファイルを生成
 	@atlas migrate diff --env $(ENV) \
 		--var "db_password=$$($(MAKE) -s db-password)"
+
+# ─── ローカル用 Atlas コマンド ───
+
+local-migrate-diff:   ## [local] スキーマ差分からマイグレーションファイルを生成
+	@atlas migrate diff --env local
+
+local-migrate-apply:  ## [local] マイグレーションを適用
+	@atlas migrate apply --env local
+
+local-migrate-status: ## [local] マイグレーション状態を確認
+	@atlas migrate status --env local
+
+local-migrate-hash:   ## [local] チェックサムを再計算（マイグレーション手動編集後に実行）
+	@atlas migrate hash --env local

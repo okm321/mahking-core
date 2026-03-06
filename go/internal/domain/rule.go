@@ -22,9 +22,10 @@ type Rule struct {
 	RankingPointsThird  int      // 三位のウマ
 	RankingPointsFour   null.Int // 四位のウマ
 	//govalid:required
-	//govalid:enum=FractionalCalculationRoundUp,FractionalCalculationRoundDown,FractionalCalculationRoundNearest,FractionalCalculationRoundUpBelowTen,FractionalCalculationRoundDownBelowTen
+	//govalid:enum=FractionalCalculationDecimal,FractionalCalculationRoundDown,FractionalCalculationRoundUp,FractionalCalculationRoundNearest,FractionalCalculationRoundFive
 	FractionalCalculation FractionalCalculation // 端数計算方法
-	UseBust   bool     // 飛び設定
+	FractionalRecipient   FractionalRecipient   // 端数を受け取る人（小数点有効以外の場合必須）
+	UseBust               bool                  // 飛び設定
 	BustPoint null.Int // 飛び賞のポイント
 	UseChip   bool     // チップ設定
 	ChipPoint null.Int // チップのポイント
@@ -39,6 +40,7 @@ type NewRuleArgs struct {
 	RankingPointsThird    int
 	RankingPointsFour     null.Int
 	FractionalCalculation FractionalCalculation
+	FractionalRecipient   FractionalRecipient
 	UseBust               bool
 	BustPoint             null.Int
 	UseChip               bool
@@ -56,6 +58,7 @@ func NewRule(groupID int64, args NewRuleArgs) (_ *Rule, err error) {
 		RankingPointsThird:    args.RankingPointsThird,
 		RankingPointsFour:     args.RankingPointsFour,
 		FractionalCalculation: args.FractionalCalculation,
+		FractionalRecipient:   args.FractionalRecipient,
 		UseBust:               args.UseBust,
 		BustPoint:             args.BustPoint,
 		UseChip:               args.UseChip,
@@ -100,6 +103,13 @@ func (r *Rule) validateRules() error {
 				r.RankingPointsFirst+r.RankingPointsSecond+r.RankingPointsThird+int(r.RankingPointsFour.Int64),
 			)
 		}
+	}
+
+	if !r.FractionalCalculation.IsDecimal() && !r.FractionalRecipient.IsValid() {
+		return pkgerror.NewErrorf("端数を受け取る人は必須です")
+	}
+	if r.FractionalCalculation.IsDecimal() && r.FractionalRecipient.IsValid() {
+		return pkgerror.NewErrorf("小数点有効の場合、端数を受け取る人は指定できません")
 	}
 
 	if r.UseBust && !r.BustPoint.Valid {

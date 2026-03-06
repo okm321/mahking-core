@@ -30,8 +30,8 @@ var (
 	// ErrRuleReturnPointsRequiredValidation is returned when the ReturnPoints is required but not provided.
 	ErrRuleReturnPointsRequiredValidation = govaliderrors.ValidationError{Reason: "field ReturnPoints is required", Path: "Rule.ReturnPoints", Type: "required"}
 
-	// ErrRuleFractionalCalculationEnumValidation is the error returned when the value is not in the allowed enum values FractionalCalculationRoundUp, FractionalCalculationRoundDown, FractionalCalculationRoundNearest, FractionalCalculationRoundUpBelowTen, FractionalCalculationRoundDownBelowTen.
-	ErrRuleFractionalCalculationEnumValidation = govaliderrors.ValidationError{Reason: "field FractionalCalculation must be one of FractionalCalculationRoundUp, FractionalCalculationRoundDown, FractionalCalculationRoundNearest, FractionalCalculationRoundUpBelowTen, FractionalCalculationRoundDownBelowTen", Path: "Rule.FractionalCalculation", Type: "enum"}
+	// ErrRuleFractionalCalculationEnumValidation is the error returned when the value is not in the allowed enum values FractionalCalculationDecimal, FractionalCalculationRoundDown, FractionalCalculationRoundUp, FractionalCalculationRoundNearest, FractionalCalculationRoundFive.
+	ErrRuleFractionalCalculationEnumValidation = govaliderrors.ValidationError{Reason: "field FractionalCalculation must be one of FractionalCalculationDecimal, FractionalCalculationRoundDown, FractionalCalculationRoundUp, FractionalCalculationRoundNearest, FractionalCalculationRoundFive", Path: "Rule.FractionalCalculation", Type: "enum"}
 
 	// ErrRuleFractionalCalculationRequiredValidation is returned when the FractionalCalculation is required but not provided.
 	ErrRuleFractionalCalculationRequiredValidation = govaliderrors.ValidationError{Reason: "field FractionalCalculation is required", Path: "Rule.FractionalCalculation", Type: "required"}
@@ -80,7 +80,7 @@ func ValidateRule(t *Rule) error {
 		errs = append(errs, err)
 	}
 
-	if t.FractionalCalculation != FractionalCalculationRoundUp && t.FractionalCalculation != FractionalCalculationRoundDown && t.FractionalCalculation != FractionalCalculationRoundNearest && t.FractionalCalculation != FractionalCalculationRoundUpBelowTen && t.FractionalCalculation != FractionalCalculationRoundDownBelowTen {
+	if t.FractionalCalculation != FractionalCalculationDecimal && t.FractionalCalculation != FractionalCalculationRoundDown && t.FractionalCalculation != FractionalCalculationRoundUp && t.FractionalCalculation != FractionalCalculationRoundNearest && t.FractionalCalculation != FractionalCalculationRoundFive {
 		err := ErrRuleFractionalCalculationEnumValidation
 		err.Value = t.FractionalCalculation
 		errs = append(errs, err)
